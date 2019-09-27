@@ -1,6 +1,7 @@
 package com.chenlw.webservice;
 
 
+import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
@@ -119,7 +120,7 @@ public class Axis2Tester {
             //创建一个OMFactory
             OMFactory factory = OMAbstractFactory.getOMFactory();
             //指定命名空间
-            OMNamespace namespace = factory.createOMNamespace(targetNamespace, "sequence");
+            OMNamespace namespace = factory.createOMNamespace(targetNamespace, "");
             //创建method对象，方法名 为getMobileCodeInfo
             OMElement method = factory.createOMElement(METHOD, namespace);
 
@@ -139,10 +140,11 @@ public class Axis2Tester {
             //请求参数设置
             ServiceClient sender = new ServiceClient();
             Options options = new Options();
-            options.setAction(targetNamespace + METHOD);
             options.setTo(endpointReference);
+            // 不要执行setAction
+            // options.setAction(targetNamespace + METHOD);
             // 这句很关键，解决异常org.apache.axis2.AxisFault: Unmarshalling Error: 意外的元素
-            options.setProperty(org.apache.axis2.Constants.Configuration.DISABLE_SOAP_ACTION, true);
+            // options.setProperty(org.apache.axis2.Constants.Configuration.DISABLE_SOAP_ACTION, true);
 
             // 添加HTTP请求头
             List<NamedValue> headerList = new ArrayList<>();
@@ -156,13 +158,18 @@ public class Axis2Tester {
             OMElement result = sender.sendReceive(method);
             System.out.println("result:" + result.toString());
             // 如果转化失败，authenticationResponse为null
-            AuthenticationResponse authenticationResponse = JackSonXmUtils.xmlToBean(result.toString(), AuthenticationResponse.class);
-            System.out.println(authenticationResponse.toString());
+            if (result != null) {
+                // 如果转化失败，authenticationResponse为null
+                XmlMapper xmlMapper = new XmlMapper();
+                AuthenticationResponse authenticationResponse = xmlMapper.readValue(result.toString(), AuthenticationResponse.class);
+                System.out.println(authenticationResponse.toString());
+                if (authenticationResponse != null && authenticationResponse.getReturnNode() != null) {
+                    AuthenticationResponse.Return authReturn = authenticationResponse.getReturnNode();
+                    if (0 == authReturn.getCode() && "0".equals(authReturn.getData())) {
 
-//            Iterator iterator = result.getChildElements();
-//            while (iterator.hasNext()){
-//                System.out.println(iterator.next());
-//            }
+                    }
+                }
+            }
         } catch (Exception ex) {
             ex.printStackTrace();
             System.out.println("异常:" + ex.getMessage());

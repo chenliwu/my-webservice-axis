@@ -93,7 +93,7 @@
             <scope>provided</scope>
         </dependency>
 
-
+        <!-- fast xml  -->
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-core</artifactId>
@@ -114,8 +114,7 @@
             <artifactId>jackson-dataformat-xml</artifactId>
             <version>2.9.8</version>
         </dependency>
-
-
+        <!-- fast xml  -->
 
     </dependencies>
 
