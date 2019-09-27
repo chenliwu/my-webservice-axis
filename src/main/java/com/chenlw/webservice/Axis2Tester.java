@@ -1,12 +1,10 @@
 package com.chenlw.webservice;
 
-import org.apache.axiom.mime.Header;
+
 import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
 import org.apache.axiom.om.OMNamespace;
-import org.apache.axiom.soap.SOAP12Constants;
-import org.apache.axis2.AxisFault;
 import org.apache.axis2.addressing.EndpointReference;
 import org.apache.axis2.client.Options;
 import org.apache.axis2.client.ServiceClient;
@@ -18,7 +16,6 @@ import org.apache.commons.httpclient.params.HttpMethodParams;
 
 import javax.xml.namespace.QName;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -156,19 +153,19 @@ public class Axis2Tester {
             // 取消重复请求
             options.setProperty(HttpMethodParams.RETRY_HANDLER, new DefaultHttpMethodRetryHandler(0, false));
             sender.setOptions(options);
-
-
-
             OMElement result = sender.sendReceive(method);
-            Iterator iterator = result.getChildElements();
-            while (iterator.hasNext()){
-                System.out.println(iterator.next());
-            }
-            System.out.println( result.getText());
+            System.out.println("result:" + result.toString());
+            // 如果转化失败，authenticationResponse为null
+            AuthenticationResponse authenticationResponse = JackSonXmUtils.xmlToBean(result.toString(), AuthenticationResponse.class);
+            System.out.println(authenticationResponse.toString());
 
-            System.out.println(result.getFirstElement().getText());
-        } catch (AxisFault ex) {
+//            Iterator iterator = result.getChildElements();
+//            while (iterator.hasNext()){
+//                System.out.println(iterator.next());
+//            }
+        } catch (Exception ex) {
             ex.printStackTrace();
+            System.out.println("异常:" + ex.getMessage());
         }
     }
 
