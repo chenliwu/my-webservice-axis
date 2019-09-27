@@ -160,6 +160,10 @@ public class Axis2Tester {
 
 
             OMElement result = sender.sendReceive(method);
+            Iterator iterator = result.getChildElements();
+            while (iterator.hasNext()){
+                System.out.println(iterator.next());
+            }
             System.out.println( result.getText());
 
             System.out.println(result.getFirstElement().getText());
