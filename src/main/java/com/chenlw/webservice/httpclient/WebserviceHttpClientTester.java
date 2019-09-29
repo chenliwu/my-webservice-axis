@@ -1,8 +1,6 @@
 package com.chenlw.webservice.httpclient;
 
-import com.chenlw.webservice.AuthenticationSoapEnvelope;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.dataformat.xml.XmlMapper;
+import com.chenlw.webservice.soap.SoapParseUtils;
 import org.apache.axis.utils.StringUtils;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpStatus;
@@ -14,6 +12,7 @@ import org.apache.commons.io.IOUtils;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.Map;
 
 /**
  * @author chenlw
@@ -52,16 +51,10 @@ public class WebserviceHttpClientTester {
         String password = "ia04agZTT0n1TZoiDUivNVqdk3m6RPjJJl9a/izRvt3Swp4RXihgrnbqrguFIrx+LwqoG+QOGRW3TyP3eNdqDg==";
         String ticket = "18627da2-1f40-48da-87b5-c4f4dec31089";
         String requestData = String.format(requestXml, userid, password);
-        String res = callWebservice(SERVICE_URL, requestData, ticket);
-        if (!StringUtils.isEmpty(requestData)) {
-            XmlMapper xmlMapper = new XmlMapper();
-            xmlMapper.setDefaultUseWrapper(false);
-            //自动忽略无法对应pojo的字段
-            xmlMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-            AuthenticationSoapEnvelope authenticationSoapEnvelope = xmlMapper.readValue(res, AuthenticationSoapEnvelope.class);
-            if (authenticationSoapEnvelope != null) {
-                System.out.println(authenticationSoapEnvelope.toString());
-            }
+        String soapRes = callWebserviceUsingHttpClient(SERVICE_URL, requestData, ticket);
+        if (!StringUtils.isEmpty(soapRes)) {
+            Map<String, String> resultMap = SoapParseUtils.parse(soapRes);
+            System.out.println(resultMap.toString());
         }
 
     }
@@ -77,7 +70,8 @@ public class WebserviceHttpClientTester {
      * @param ticket      ticket
      * @return 结果
      */
-    public static String callWebservice(String wsdl, String requestData, String ticket) {
+    public static String callWebserviceUsingHttpClient(String wsdl, String requestData, String ticket) throws Exception {
+        String soapResponse = null;
         try {
             // requestData可以直接用soapUi中请求的数据，注意<![CDATA[]]>的使用
             PostMethod postMethod = new PostMethod(wsdl);
@@ -85,7 +79,6 @@ public class WebserviceHttpClientTester {
             InputStream in = new ByteArrayInputStream(bytes, 0, bytes.length);
             RequestEntity requestEntity = new InputStreamRequestEntity(in, "text/xml; charset=utf-8");
             postMethod.setRequestEntity(requestEntity);
-
             // 添加HTTP请求头
             postMethod.setRequestHeader("ticket", ticket);
             HttpClient client = new HttpClient();
@@ -96,20 +89,19 @@ public class WebserviceHttpClientTester {
             int status = client.executeMethod(postMethod);
             if (status == HttpStatus.SC_OK) {
                 // 成功
+                // 获取的结果可以参考用soapUI调用时的返回值，
+                // 如果约定的返回值是XML,并不会像soapUI一样把xml用<![CDATA[]]>包含起来,要注意解析的方法,
                 InputStream is = postMethod.getResponseBodyAsStream();
-                /**
-                 * 获取的结果可以参考用soapUI调用时的返回值，
-                 * 如果约定的返回值是XML,并不会像soapUI一样把xml用<![CDATA[]]>包含起来,要注意解析的方法,
-                 */
-                String resString = IOUtils.toString(is, StandardCharsets.UTF_8.displayName());
-                System.out.println(resString);
+                soapResponse = IOUtils.toString(is, StandardCharsets.UTF_8.displayName());
+                System.out.println(soapResponse);
             } else {
                 System.out.println("调用Webservice出错;错误代码为：" + status);
             }
         } catch (Exception e) {
             System.out.println("调用Webservice出错：" + e.getMessage());
+            throw e;
         }
-        return null;
+        return soapResponse;
     }
 
 
