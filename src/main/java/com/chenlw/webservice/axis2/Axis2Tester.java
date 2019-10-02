@@ -1,6 +1,7 @@
-package com.chenlw.webservice;
+package com.chenlw.webservice.axis2;
 
 
+import com.chenlw.webservice.AuthenticationResponse;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
