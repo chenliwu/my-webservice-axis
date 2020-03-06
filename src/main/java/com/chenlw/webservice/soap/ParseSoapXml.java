@@ -24,7 +24,7 @@ public class ParseSoapXml {
     public static void main(String[] args) {
         try {
             // testParse1();
-            testPaese2();
+            testParse2();
         } catch (Exception e) {
             System.out.println("Error:" + e.getMessage());
         }
@@ -42,7 +42,7 @@ public class ParseSoapXml {
     }
 
 
-    public static void testPaese2() throws DocumentException {
+    public static void testParse2() throws DocumentException {
         String test_data = "<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n" +
                 "\t<soap:Body>\n" +
                 "\t\t<ns2:authenticationResponse xmlns:ns2=\"http://auth.webservice.hy.com/\">\n" +
