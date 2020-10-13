@@ -37,6 +37,7 @@ public class Axis2Tester1 {
     }
 
     public static void test1() throws Exception {
+
         //RPCServiceClient是RPC方式调用
         RPCServiceClient client = new RPCServiceClient();
         Options options = client.getOptions();
